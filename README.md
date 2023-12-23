@@ -3,7 +3,7 @@
 The contents of the repository are distributed as follows:
 - DAG-Files: Directory containing python files pertaiing to each task in the airflow workflow designed for this project
   - data.py: for fetching and merging data files to form the final dataset we used for model training.
-  - KNN.py, MLP(1).py, NaiveBayes.py, RF.py, SVC.py, logReg.py, xGB.py: python files containing train and test scripts to be run in the airflow pipeline.
+  - KNN.py, MLP.py, NaiveBayes.py, RF.py, SVC.py, logReg.py, xGB.py: python files containing train and test scripts to be run in the airflow pipeline.
   - fraud.py: airflow script that calls all of the above during airflow execution and collates the performance metrics obtained from each model task in the airflow.
  
 - dashboards
