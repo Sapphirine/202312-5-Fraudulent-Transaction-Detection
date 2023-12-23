@@ -1,6 +1,6 @@
 # 202312-5-Fraudulent-Transaction-Detection
 
-The contents of teh repository are distributed as follows:
+The contents of the repository are distributed as follows:
 - DAG-Files: Directory containing python files pertaiing to each task in the airflow workflow designed for this project
   - data.py: for fetching and merging data files to form the final dataset we used for model training.
   - KNN.py, MLP(1).py, NaiveNayes.py, RF.py, SVC.py, logReg.py, xGB.py: python files containing train and test scripts to be run in the airflow pipeline.
