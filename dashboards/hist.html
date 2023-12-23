@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Loading v4 d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- graph plotting div -->
+<div id="histogram"></div>
+
+<p>
+    <label>#bins</label>
+    <input type="number" min="5" max="25" step="5" value="5" id="nBin">
+</p>
+
+<p>
+    <label for="variable-name">Variable</label>
+    <select name="variable-name" id="variable-name"> 
+        <option value="TransactionAmt">Transaction Amount</option> 
+        <option value="TransactionDT">TransactionDT</option> 
+    </select>
+</p>
+
+<script>
+    var margin = {top: 40, right: 30, bottom: 30, left: 40},
+        width = 860 - margin.left - margin.right,
+        height = 800 - margin.top - margin.bottom;
+
+    var svg = d3.select("#histogram")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")"); 
+
+    d3.csv("train_transaction.csv", function(data) {
+        const dropdown = d3.select("#variable-name");
+        
+        var selectedVariable = dropdown.property("value");;
+
+        // update based on variable chosen
+        function updateVar(){
+            selectedVariable = dropdown.property("value");
+            update(5);
+        } 
+
+        console.log(selectedVariable)
+        
+        var x = d3.scaleLinear()
+            .domain([0, d3.max(data, function(d) { return +d[selectedVariable] })]) 
+            .range([0, width]);
+
+
+        var y = d3.scaleLinear()
+            .range([height, 0]);
+        
+        var xAxis = svg.append("g");
+        var yAxis = svg.append("g");
+
+        // Update histogram on #bbon change
+        function update(nBin) {
+            // svg.select("y label").remove();
+
+            if (svg.selectAll("text").size() > 0) {
+                svg.select("y label").remove();
+            }
+
+            var histogram = d3.histogram()
+                .value(function(d) { return d[selectedVariable]; })
+                .domain(x.domain())
+                .thresholds(x.ticks(nBin)); // number of bins
+
+            var bins = histogram(data);
+
+            x.domain([0, d3.max(data, function(d) { return +d[selectedVariable] }) + 3])
+                .range([0,width]);
+            xAxis
+                .attr("transform", "translate(0," + height + ")")
+                .transition()
+                .duration(1000)
+                .call(d3.axisBottom(x));
+
+            y.domain([0, d3.max(bins, function(d) { return d.length; })]);
+            yAxis
+                .transition()
+                .duration(1000)
+                .call(d3.axisLeft(y));
+
+            var u = svg.selectAll("rect")
+                .data(bins)
+
+            u.enter()
+                .append("rect") //add a new rectangle for each new element
+                .merge(u) //get already existing elements
+                .transition() //apply changes to all elements
+                .duration(1000)
+                    .attr("x", 1)
+                    .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
+                    .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
+                    .attr("height", function(d) { return height - y(d.length); })
+                    .style("fill", "#69b3a2");
+
+            // Remove extra bars in the histogram
+            u.exit()
+                .remove()
+
+            
+            //Title
+            svg.append("text")
+                .attr("class", "title")
+                .attr("x", width/2)
+                .attr("y", -10)
+                .attr("text-anchor", "middle")
+                .style("font-size", "30px")
+                .text(selectedVariable + " Histogram");
+
+            //X-Axis Label
+            svg.append("text")
+                .attr("class", "x-label")
+                .attr("text-anchor", "end")
+                .attr("x", width/2)
+                .attr("y", height + 28)
+                .style("font-size", "20px")
+                .text(selectedVariable);
+
+            //Y-axis Label
+            svg.append("text")
+                .attr("class", "y-label")
+                .attr("text-anchor", "end")
+                .attr("x", -(height/2))
+                .attr("y", -42)
+                .attr("dy", ".75em")
+                .attr("transform", "rotate(-90)")
+                .style("font-size", "20px")
+                .text("Frequency");
+        }
+
+        update(5)
+
+        d3.select("#nBin").on("input", function(){
+            update(+this.value);
+        });
+
+        d3.select("#variable-name").on("input", function(){
+            svg.selectAll(".title").remove();
+            svg.selectAll(".x-label").remove();
+            svg.selectAll(".y-label").remove();
+
+        });
+
+        dropdown.on("change", updateVar);
+    });
+</script>
